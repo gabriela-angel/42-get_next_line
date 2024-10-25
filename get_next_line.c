@@ -6,28 +6,38 @@
 /*   By: gangel-a <gangel-a@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/22 15:40:00 by gangel-a          #+#    #+#             */
-/*   Updated: 2024/10/23 14:15:19 by gangel-a         ###   ########.fr       */
+/*   Updated: 2024/10/24 21:34:55 by gangel-a         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
+char	*read_file(int fd);
+void	update_rest(char **ptr, char *str, char mode);
+char	*populate_line(char *buffer, char *rest);
+
+
 char	*get_next_line(int fd)
 {
-	// NAO TRATADO:
-//E SE A GNT AINDA NAO TIVER CHEGADO NUMA queBRA De LINHA E O ARQUIVO NSO TIVER TERMINADO)
 	char		*line;
-	static char	*rest;
-	size_t		rest_len;
-	size_t		len;
-	size_t		i;
 	char		*buffer;
-	size_t		bytes_read;
-	char		*temp;
+	static char	*rest;
+buffer &&
+	update_rest(&rest, "", 'a');
+	buffer = read_file(fd);
+	line = populate_line(buffer, rest);
+	if (!line)
+		return (NULL);
+	if (!*line)
+		line = get_next_line(fd);
+	return (line);
+}
 
-	i = 0;
+char	*read_file(int fd)
+{
+	char	*buffer;
+	size_t	bytes_read;
 
-	// PROCESSO DE LEITURA
 	buffer = (char *)malloc(BUFFER_SIZE * sizeof(char));
 	if (!buffer)
 		return (NULL);
@@ -35,98 +45,88 @@ char	*get_next_line(int fd)
 	if (bytes_read <= 0)
 		return (NULL);
 	buffer[bytes_read] = '\0';
+	return (buffer);
+}
 
-	// ONLY IF REST == NULL;
-	// CREATE REST
-	rest_len = bytes_read - line_len(buffer);
-	rest = (char *)malloc(rest_len + 1);
-	if (!rest)
-		return (NULL);
+void	update_rest(char **ptr, char *str, char mode)
+{
+	char		*temp;
 
-	// CREATE LINE
+	temp = NULL;
+	if (!*ptr)
+		*ptr = ft_strdup("");
+	if (!mode || (mode != 'c' && mode != 'a'))
+		return ;
+	if (mode == 'c')
+		temp = ft_substr(str, line_len(str), ft_strlen(str) - line_len(str));
+	else if (mode == 'a')
+		temp = ft_strjoin(*ptr, str);
+	free(*ptr);
+	*ptr = ft_strdup(temp);
+	free(temp);
+	return ;
+}
+
+char	*populate_line(char *buffer, char *rest)
+{
+	char	*line;
+	char	*temp;
+
+	line = NULL;
+	temp = NULL;
 	if (*rest)
 	{
-		len = line_len(rest);
-		if (rest[len] != '\n')
-			len += line_len(buffer);
+		if (ft_strchr(rest, '\n') == NULL)
+		{
+			if (buffer && ft_strchr(buffer, '\n') == NULL)
+			{
+				update_rest(&rest, buffer, 'a');
+				return (ft_strdup(""));
+			}
+			else if (buffer)
+			{
+				temp = ft_substr(buffer, 0, line_len(buffer));
+				line = ft_strjoin(rest, temp);
+				free(temp);
+				update_rest(&rest, buffer, 'c');
+			}
+			else
+			{
+				line = ft_substr(rest, 0, ft_strlen(rest));
+			}
+		}
+		else
+		{
+			line = ft_substr(rest, 0, line_len(rest));
+			update_rest(&rest, rest, 'c');
+		}
 	}
 	else
-		len = line_len(buffer);
-	line = (char *)malloc(len + 1);
+	{
+		if (ft_strchr(buffer, '\n') == NULL)
+		{
+			update_rest(&rest, buffer, 'a');
+			return (ft_strdup(""));
+		}
+		else
+		{
+			line = ft_substr(buffer, 0, line_len(buffer));
+			update_rest(&rest, buffer, 'c');
+		}
+	}
 	if (!line)
 		return (NULL);
 	return (line);
-
-	// POPULATE LINE
-	i = 0;
-	j = 0;
-	if (!*rest)
-	{
-		while (rest[i] != '\n' && rest[i])
-			line[i++] = rest[i++];
-		if (rest[i] == '\n')
-		{
-			line[i] == rest[i];
-			return (line);
-		}
-	}
-	while (buffer[j] != '\n' && buffer[j])
-		line[i] = buffer[j];
-	if (buffer[j] == '\n')
-		line[i] == buffer[j];
-	return (line);
-
-	// IF *REST = NULL
-	if (*rest == NULL)
-		// POPULATE REST
-		while (buffer[len + i])
-			rest[i++] = buffer[len + i++];
-	else
-	// ELSE IF *REST != NULL
-		//REMOVE PART THAT WAS COPIED TO LINE FROM REST
-		//AND FREE IF REST GETS EMPTY
-		while ()
-		{
-
-		}
-
-}
-
-int	line_count(char *str)
-{
-	int	lines;
-	int	i;
-
-	lines = 0;
-	while (str[i])
-	{
-		if (str[i] == '\n')
-			lines++;
-		i++;
-	}
-	return (lines);
-}
-
-size_t	line_len(char *str)
-{
-	size_t	len;
-
-	len = 0;
-	while (str[len])
-	{
-		if (str[len] == '\n')
-			return (len + 1);
-		len++;
-	}
-	return (len);
 }
 
 #include <fcntl.h>
 
-void	main(void)
+int	main(void)
 {
 	int	fd = open("teste.txt", O_RDWR);
-	
-	while (get_next_line != NULL)
-		get_next_line(fd);
+	int	i = 0;
+
+	while (get_next_line(fd) != NULL)
+		i++;
+	return (0);
 }
