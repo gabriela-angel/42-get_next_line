@@ -6,127 +6,102 @@
 /*   By: gangel-a <gangel-a@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/22 15:40:00 by gangel-a          #+#    #+#             */
-/*   Updated: 2024/10/24 21:34:55 by gangel-a         ###   ########.fr       */
+/*   Updated: 2024/10/25 17:45:33 by gangel-a         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-char	*read_file(int fd);
-void	update_rest(char **ptr, char *str, char mode);
-char	*populate_line(char *buffer, char *rest);
-
-
-char	*get_next_line(int fd)
+static char	*initialize_empty(void)
 {
-	char		*line;
-	char		*buffer;
-	static char	*rest;
-buffer &&
-	update_rest(&rest, "", 'a');
-	buffer = read_file(fd);
-	line = populate_line(buffer, rest);
-	if (!line)
+	char	*ptr;
+
+	ptr = (char *)malloc(sizeof(char));
+	if (!ptr)
 		return (NULL);
-	if (!*line)
-		line = get_next_line(fd);
-	return (line);
+	ptr[0] = '\0';
+	return (ptr);
 }
 
-char	*read_file(int fd)
+static char	*cut_line(char **ptr, size_t start)
+{
+	char	*temp;
+
+	temp = ft_substr(*ptr, start, ft_strlen(*ptr) - start);
+	free(*ptr);
+	*ptr = ft_substr(temp, 0, ft_strlen(temp));
+	free(temp);
+	return (*ptr);
+}
+
+static int	read_file(char **ptr, int fd)
 {
 	char	*buffer;
 	size_t	bytes_read;
 
-	buffer = (char *)malloc(BUFFER_SIZE * sizeof(char));
-	if (!buffer)
-		return (NULL);
-	bytes_read = read(fd, buffer, BUFFER_SIZE - 1);
-	if (bytes_read <= 0)
-		return (NULL);
-	buffer[bytes_read] = '\0';
-	return (buffer);
-}
-
-void	update_rest(char **ptr, char *str, char mode)
-{
-	char		*temp;
-
-	temp = NULL;
 	if (!*ptr)
-		*ptr = ft_strdup("");
-	if (!mode || (mode != 'c' && mode != 'a'))
-		return ;
-	if (mode == 'c')
-		temp = ft_substr(str, line_len(str), ft_strlen(str) - line_len(str));
-	else if (mode == 'a')
-		temp = ft_strjoin(*ptr, str);
-	free(*ptr);
-	*ptr = ft_strdup(temp);
-	free(temp);
-	return ;
+		*ptr = initialize_empty();
+	if (fd < 0 || BUFFER_SIZE <= 0)
+		return (0);
+	buffer = (char *)malloc((BUFFER_SIZE + 1) * sizeof(char));
+	if (!buffer)
+		return (0);
+	bytes_read = read(fd, buffer, BUFFER_SIZE);
+	while (bytes_read)
+	{
+		buffer[bytes_read] = '\0';
+		*ptr = ft_strjoin(*ptr, buffer);
+		if (ft_strchr(*ptr, '\n') != -1)
+			break ;
+		bytes_read = read(fd, buffer, BUFFER_SIZE);
+	}
+	free(buffer);
+	return (1);
 }
 
-char	*populate_line(char *buffer, char *rest)
+char	*get_next_line(int fd)
 {
-	char	*line;
-	char	*temp;
+	char		*line;
+	static char	*read = NULL;
+	size_t		end_line;
 
-	line = NULL;
-	temp = NULL;
-	if (*rest)
+	if (!read_file(&read, fd))
+		return (NULL);
+	end_line = ft_strchr(read, '\n');
+	if (end_line < 0)
 	{
-		if (ft_strchr(rest, '\n') == NULL)
-		{
-			if (buffer && ft_strchr(buffer, '\n') == NULL)
-			{
-				update_rest(&rest, buffer, 'a');
-				return (ft_strdup(""));
-			}
-			else if (buffer)
-			{
-				temp = ft_substr(buffer, 0, line_len(buffer));
-				line = ft_strjoin(rest, temp);
-				free(temp);
-				update_rest(&rest, buffer, 'c');
-			}
-			else
-			{
-				line = ft_substr(rest, 0, ft_strlen(rest));
-			}
-		}
-		else
-		{
-			line = ft_substr(rest, 0, line_len(rest));
-			update_rest(&rest, rest, 'c');
-		}
+		line = ft_substr(read, 0, ft_strlen(read));
+		free(read);
+		read = NULL;
 	}
 	else
 	{
-		if (ft_strchr(buffer, '\n') == NULL)
-		{
-			update_rest(&rest, buffer, 'a');
-			return (ft_strdup(""));
-		}
-		else
-		{
-			line = ft_substr(buffer, 0, line_len(buffer));
-			update_rest(&rest, buffer, 'c');
-		}
+		line = ft_substr(read, 0, end_line + 1);
+		read = cut_line(&read, end_line + 1);
 	}
-	if (!line)
+	if (ft_strlen(line) == 0)
+	{
+		free(line);
 		return (NULL);
+	}
 	return (line);
 }
 
 #include <fcntl.h>
+#include <stdio.h>
 
 int	main(void)
 {
 	int	fd = open("teste.txt", O_RDWR);
-	int	i = 0;
+	char	*ptr = NULL;
 
-	while (get_next_line(fd) != NULL)
-		i++;
+	ptr = get_next_line(fd);
+	while (ptr)
+	{
+		printf("%s", ptr);
+		free(ptr);
+		ptr = get_next_line(fd);
+	}
+	close(fd);
 	return (0);
 }

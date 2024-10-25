@@ -6,25 +6,11 @@
 /*   By: gangel-a <gangel-a@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/22 15:42:12 by gangel-a          #+#    #+#             */
-/*   Updated: 2024/10/24 19:19:44 by gangel-a         ###   ########.fr       */
+/*   Updated: 2024/10/25 17:07:04 by gangel-a         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
-
-size_t	line_len(char *str)
-{
-	size_t	len;
-
-	len = 0;
-	while (str[len])
-	{
-		if (str[len] == '\n')
-			return (len + 1);
-		len++;
-	}
-	return (len);
-}
 
 size_t	ft_strlen(const char *s)
 {
@@ -36,20 +22,20 @@ size_t	ft_strlen(const char *s)
 	return (i);
 }
 
-char	*ft_strchr(const char *s, int c)
+int	ft_strchr(const char *s, int c)
 {
-	char	*ptr;
+	int		i;
 
-	ptr = (char *)s;
-	while (*ptr)
+	i = 0;
+	while (s[i])
 	{
-		if (*ptr == (unsigned char)c)
-			return (ptr);
-		ptr++;
+		if (s[i] == (unsigned char)c)
+			return (i);
+		i++;
 	}
 	if ((unsigned char)c == '\0')
-		return (ptr);
-	return (NULL);
+		return (i);
+	return (-1);
 }
 
 char	*ft_strjoin(char const *s1, char const *s2)
@@ -95,29 +81,16 @@ size_t	ft_strlcpy(char *dst, const char *src, size_t size)
 	return (len_s);
 }
 
-char	*ft_strdup(const char *s)
-{
-	char	*ptr;
-	size_t	len;
-
-	len = ft_strlen(s);
-	ptr = malloc(len + 1);
-	if (!ptr)
-		return (NULL);
-	ft_strlcpy(ptr, s, len + 1);
-	return (ptr);
-}
-
 char	*ft_substr(char const *s, unsigned int start, size_t len)
 {
 	char	*subs;
 	size_t	s_len;
 
 	if (!s)
-		return (ft_strdup(""));
+		return (NULL);
 	s_len = ft_strlen(s);
 	if (start >= s_len)
-		return (ft_strdup(""));
+		return (NULL);
 	if (s_len - start < len)
 		len = s_len - start;
 	subs = (char *)malloc(sizeof(char) * (len + 1));
