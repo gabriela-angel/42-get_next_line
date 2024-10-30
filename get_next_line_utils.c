@@ -6,7 +6,7 @@
 /*   By: gangel-a <gangel-a@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/22 15:42:12 by gangel-a          #+#    #+#             */
-/*   Updated: 2024/10/25 17:07:04 by gangel-a         ###   ########.fr       */
+/*   Updated: 2024/10/30 14:48:55 by gangel-a         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,47 +38,39 @@ int	ft_strchr(const char *s, int c)
 	return (-1);
 }
 
-char	*ft_strjoin(char const *s1, char const *s2)
+static size_t	ft_strlcpy(char *dst, const char *src, size_t size)
 {
-	char	*ptr;
-	int		i;
-	int		j;
-
-	i = 0;
-	j = 0;
-	ptr = malloc(ft_strlen(s1) + ft_strlen(s2) + 1);
-	if (!ptr)
-		return (NULL);
-	while (s1[i])
-	{
-		ptr[i] = s1[i];
-		i++;
-	}
-	while (s2[j])
-	{
-		ptr[i + j] = s2[j];
-		j++;
-	}
-	ptr[i + j] = '\0';
-	return (ptr);
-}
-
-size_t	ft_strlcpy(char *dst, const char *src, size_t size)
-{
-	size_t	len_s;
 	size_t	i;
 
 	i = 0;
-	len_s = ft_strlen(src);
 	if (size == 0)
-		return (len_s);
+		return (ft_strlen(src));
 	while (i < size - 1 && src[i])
 	{
 		dst[i] = src[i];
 		i++;
 	}
 	dst[i] = '\0';
-	return (len_s);
+	return (ft_strlen(src));
+}
+
+char	*ft_strjoin(char *s1, char const *s2)
+{
+	char	*ptr;
+	int		s1_len;
+	int		s2_len;
+
+	s1_len = ft_strlen(s1);
+	s2_len = ft_strlen(s2);
+	if (!s1 || !s2)
+		return (NULL);
+	ptr = malloc(s1_len + s2_len + 1);
+	if (!ptr)
+		return (NULL);
+	ft_strlcpy(ptr, s1, s1_len + 1);
+	ft_strlcpy((ptr + s1_len), s2, s2_len + 1);
+	free(s1);
+	return (ptr);
 }
 
 char	*ft_substr(char const *s, unsigned int start, size_t len)
@@ -90,7 +82,13 @@ char	*ft_substr(char const *s, unsigned int start, size_t len)
 		return (NULL);
 	s_len = ft_strlen(s);
 	if (start >= s_len)
-		return (NULL);
+	{
+		subs = (char *)malloc(sizeof(char) * 1);
+		if (!subs)
+			return (NULL);
+		subs[0] = '\0';
+		return (subs);
+	}
 	if (s_len - start < len)
 		len = s_len - start;
 	subs = (char *)malloc(sizeof(char) * (len + 1));
