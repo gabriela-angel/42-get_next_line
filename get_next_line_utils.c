@@ -6,7 +6,7 @@
 /*   By: gangel-a <gangel-a@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/22 15:42:12 by gangel-a          #+#    #+#             */
-/*   Updated: 2024/10/30 14:48:55 by gangel-a         ###   ########.fr       */
+/*   Updated: 2024/10/31 16:53:33 by gangel-a         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,7 +78,7 @@ char	*ft_substr(char const *s, unsigned int start, size_t len)
 	char	*subs;
 	size_t	s_len;
 
-	if (!s)
+	if (!s || !*s)
 		return (NULL);
 	s_len = ft_strlen(s);
 	if (start >= s_len)

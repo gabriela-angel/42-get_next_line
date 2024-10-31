@@ -6,11 +6,21 @@
 /*   By: gangel-a <gangel-a@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/22 15:40:00 by gangel-a          #+#    #+#             */
-/*   Updated: 2024/10/30 14:54:11 by gangel-a         ###   ########.fr       */
+/*   Updated: 2024/10/31 17:13:38 by gangel-a         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
+
+static char	*free_and_nullify(char **ptr)
+{
+	if (*ptr)
+	{
+		free(*ptr);
+		*ptr = NULL;
+	}
+	return (NULL);
+}
 
 static char	*initialize_empty(void)
 {
@@ -38,7 +48,7 @@ static int	read_file(char **ptr, int fd)
 	char	*buffer;
 	size_t	bytes_read;
 
-	if (fd < 0 || BUFFER_SIZE <= 0 || read(fd, 0, 0) < 0)
+	if (!BUFFER_SIZE || fd < 0 || BUFFER_SIZE <= 0 || read(fd, 0, 0) < 0)
 		return (0);
 	if (!*ptr)
 		*ptr = initialize_empty();
@@ -68,13 +78,12 @@ char	*get_next_line(int fd)
 
 	line = NULL;
 	if (!read_file(&read, fd))
-		return (NULL);
+		return (free_and_nullify(&read));
 	end_line = ft_strchr(read, '\n');
 	if (end_line < 0)
 	{
 		line = ft_substr(read, 0, ft_strlen(read));
-		free(read);
-		read = NULL;
+		free_and_nullify(&read);
 	}
 	else
 	{
@@ -82,28 +91,25 @@ char	*get_next_line(int fd)
 		read = cut_line(&read, end_line + 1);
 	}
 	if (!line)
-	{
-		free(read);
-		return (NULL);
-	}
+		return (free_and_nullify(&read));
 	return (line);
 }
 
-#include <fcntl.h>
-#include <stdio.h>
+//#include <fcntl.h>
+//#include <stdio.h>
 
-int	main(void)
-{
-	int	fd = open("teste.txt", O_RDWR);
-	char	*ptr = NULL;
+//int	main(void)
+//{
+//	int	fd = open("teste.txt", O_RDWR);
+//	char	*ptr = NULL;
 
-	ptr = get_next_line(fd);
-	while (ptr && *ptr)
-	{
-		printf("%s", ptr);
-		free(ptr);
-		ptr = get_next_line(fd);
-	}
-	close(fd);
-	return (0);
-}
+//	ptr = get_next_line(fd);
+//	while (ptr && *ptr)
+//	{
+//		printf("%s", ptr);
+//		free(ptr);
+//		ptr = get_next_line(fd);
+//	}
+//	close(fd);
+//	return (0);
+//}
