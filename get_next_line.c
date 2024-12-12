@@ -6,7 +6,7 @@
 /*   By: gangel-a <gangel-a@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/22 15:40:00 by gangel-a          #+#    #+#             */
-/*   Updated: 2024/10/31 17:13:38 by gangel-a         ###   ########.fr       */
+/*   Updated: 2024/12/12 20:51:45 by gangel-a         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,31 +43,31 @@ static char	*cut_line(char **ptr, size_t start)
 	return (*ptr);
 }
 
-static int	read_file(char **ptr, int fd)
+static char	*read_file(char **ptr, int fd)
 {
 	char	*buffer;
-	size_t	bytes_read;
+	ssize_t	bytes_read;
 
-	if (!BUFFER_SIZE || fd < 0 || BUFFER_SIZE <= 0 || read(fd, 0, 0) < 0)
-		return (0);
 	if (!*ptr)
 		*ptr = initialize_empty();
 	if (!*ptr)
-		return (0);
+		return (NULL);
 	buffer = (char *)malloc((BUFFER_SIZE + 1) * sizeof(char));
 	if (!buffer)
-		return (0);
-	bytes_read = read(fd, buffer, BUFFER_SIZE);
+		return (NULL);
+	bytes_read = 1;
 	while (bytes_read > 0)
 	{
+		bytes_read = read(fd, buffer, BUFFER_SIZE);
+		if (bytes_read == -1)
+			return (free_and_nullify(&buffer));
 		buffer[bytes_read] = '\0';
 		*ptr = ft_strjoin(*ptr, buffer);
 		if (ft_strchr(*ptr, '\n') != -1)
 			break ;
-		bytes_read = read(fd, buffer, BUFFER_SIZE);
 	}
 	free(buffer);
-	return (1);
+	return (*ptr);
 }
 
 char	*get_next_line(int fd)
@@ -77,7 +77,7 @@ char	*get_next_line(int fd)
 	int			end_line;
 
 	line = NULL;
-	if (!read_file(&read, fd))
+	if (fd < 0 || BUFFER_SIZE <= 0 || !read_file(&read, fd))
 		return (free_and_nullify(&read));
 	end_line = ft_strchr(read, '\n');
 	if (end_line < 0)
